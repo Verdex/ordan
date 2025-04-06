@@ -7,3 +7,4 @@ edition = "2024"
 proc-macro = true
 
 [dependencies]
+jlnexus = { git = "https://www.github.com/verdex/jlnexus", version = "1.0.0", tag = "release-1.0.0" }

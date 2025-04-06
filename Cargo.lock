@@ -3,5 +3,13 @@
 version = 4
 
 [[package]]
+name = "jlnexus"
+version = "1.0.0"
+source = "git+https://www.github.com/verdex/jlnexus?tag=release-1.0.0#158bb5fc8f0fcf991442dbede9e729e553b0013c"
+
+[[package]]
 name = "ordan"
 version = "0.1.0"
+dependencies = [
+ "jlnexus",
+]
