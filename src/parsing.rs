@@ -19,7 +19,7 @@ macro_rules! proj {
     };
 }
 
-pub fn parse(input : &mut Parser<TokenTree>) -> Result<Pattern, ()> {
+pub (crate) fn parse(input : &mut Parser<TokenTree>) -> Result<Pattern, ()> {
     let patterns = {
         let first_pattern = pattern(input)?;
 

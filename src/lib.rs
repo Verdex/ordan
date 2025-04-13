@@ -1,6 +1,7 @@
 
 mod data;
 mod parsing;
+mod code_gen;
 
 use proc_macro::*;
 use jlnexus::Parser;
@@ -10,8 +11,10 @@ use jlnexus::Parser;
 pub fn blarg( input : TokenStream ) -> TokenStream {
     let input = input.into_iter().collect::<Vec<_>>();
     let mut parser = Parser::new(&input);
-    let result = parsing::parse(&mut parser);
-    "".parse().unwrap()
+    let result = parsing::parse(&mut parser).unwrap();
+
+    code_gen::gen_pattern(result).parse().unwrap()
+    //format!("panic!(\"{{}}\", \"{} :: {}\");", result.patterns.join(","), result.return_expr).parse().unwrap()
 }
 /*
 [ p1[x] ] x ; [ p2[y] ] => { (x, y) }
