@@ -1,4 +1,5 @@
 
-pub struct Ast {
-
+pub (crate) struct Pattern {
+    pub (crate) patterns : Vec<Rc<str>>,
+    pub (crate) return_expr : Rc<str>,
 }
