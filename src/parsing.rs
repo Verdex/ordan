@@ -20,24 +20,25 @@ macro_rules! proj {
 }
 
 pub fn parse(input : &mut Parser<TokenTree>) -> Result<Pattern, ()> {
-    //proj!(semi, TokenTree::Punct(p) if p.as_char() == ';', ());
-    //proj!(comma, TokenTree::Punct(p) if p.as_char() == ',', ());
-    let first_pattern = pattern(input)?;
+    let patterns = {
+        let first_pattern = pattern(input)?;
 
-    let mut rest_pattern = input.list(|input| {
-        proj!(input, TokenTree::Punct(p) if p.as_char() == ';', ())?;
-        pattern(input)
-    })?;
+        let mut rest_pattern = input.list(|input| {
+            proj!(input, TokenTree::Punct(p) if p.as_char() == ';', ())?;
+            pattern(input)
+        })?;
 
-    rest_pattern.insert(0, first_pattern);
-    let patterns = rest_pattern;
+        rest_pattern.insert(0, first_pattern);
+
+        rest_pattern
+    };
 
     proj!(input, TokenTree::Punct(p) if p.as_char() == '=', ())?;
     proj!(input, TokenTree::Punct(p) if p.as_char() == '>', ())?;
 
-    // todo get rest
+    let return_expr : Rc<str> = input.list(|input| Ok(input.get(())?.to_string()))?.join("").into();   // TODO get error
 
-    Ok(Pattern { patterns, return_expr: "".into()})
+    Ok(Pattern { patterns, return_expr })
 }
 
 fn pattern(input : &mut Parser<TokenTree>) -> Result<Rc<str>, ()> {
