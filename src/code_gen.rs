@@ -3,7 +3,10 @@ use std::rc::Rc;
 use crate::data::*;
 
 pub (crate) fn gen_pattern(pattern : Pattern) -> Rc<str> {
-    gen_match("x", &pattern.patterns[0], &pattern.return_expr)
+
+    let v = gen_match("input", &pattern.clauses[0].pattern, &pattern.return_expr);
+
+    format!("|input| {}", v).into()
 }
 
 fn gen_match(input : &str, pattern : &str, expr : &str ) -> Rc<str> {
