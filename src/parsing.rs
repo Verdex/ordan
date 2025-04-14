@@ -21,14 +21,16 @@ macro_rules! proj {
 
 pub (crate) fn parse(input : &mut Parser<TokenTree>) -> Result<Pattern, ()> {
     let clauses = {
-        let first_clause = clause(input)?;
+        let first_pattern = pattern(input)?;
 
         let mut rest_clause = input.list(|input| {
+            let ns = nexts(input)?;
             proj!(input, TokenTree::Punct(p) if p.as_char() == ';', ())?;
-            clause(input)
+            let pat = pattern(input)?;
+            Ok(Clause { pattern: pat, nexts: ns })
         })?;
 
-        rest_clause.insert(0, first_clause);
+        rest_clause.insert(0, Clause { pattern: first_pattern, nexts: vec![] });
 
         rest_clause
     };
@@ -41,12 +43,8 @@ pub (crate) fn parse(input : &mut Parser<TokenTree>) -> Result<Pattern, ()> {
     Ok(Pattern { clauses, return_expr })
 }
 
-fn clause(input : &mut Parser<TokenTree>) -> Result<Clause, ()> {
-    let pattern = proj!(input, TokenTree::Group(g) if g.delimiter() == Delimiter::Bracket, g.stream().to_string().into())?;
-    match input.option(|input| nexts(input))? {
-        Some(nexts) => Ok(Clause { pattern, nexts }),
-        None => Ok(Clause { pattern, nexts: vec![] }),
-    }
+fn pattern(input : &mut Parser<TokenTree>) -> Result<Rc<str>, ()> {
+    proj!(input, TokenTree::Group(g) if g.delimiter() == Delimiter::Bracket, g.stream().to_string().into())
 }
 
 fn nexts(input : &mut Parser<TokenTree>) -> Result<Vec<Rc<str>>, ()> {
