@@ -16,7 +16,7 @@ pub (crate) fn gen_pattern(mut pattern : Pattern) -> Rc<str> {
         }
     }
 
-    r_to_str(&ret)
+    format!("|input| {}", r_to_str(&ret)).into()
 }
 
 enum R {
