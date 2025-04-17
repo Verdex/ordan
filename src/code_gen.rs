@@ -16,7 +16,7 @@ pub (crate) fn gen_pattern(mut pattern : Pattern) -> Rc<str> {
         }
     }
 
-    r_to_str(ret)
+    r_to_str(&ret)
 }
 
 enum R {
@@ -39,8 +39,12 @@ impl Clone for R {
     }
 }
 
-fn r_to_str(input : R) -> Rc<str> {
-    todo!()
+fn r_to_str(input : &R) -> Rc<str> {
+    match input {
+        R::Match { input, pattern, expr } => gen_match(&input, &pattern, &r_to_str(expr)),
+        R::ReturnExpr(s) => Rc::clone(s),
+        R::SyntaxList(l) => l.into_iter().map(|x| r_to_str(x)).collect::<Vec<_>>().join("\n").into(),
+    }
 }
 
 fn gen_match(input : &str, pattern : &str, expr : &str) -> Rc<str> {
