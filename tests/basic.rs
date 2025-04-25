@@ -4,9 +4,10 @@ use ordan::*;
 #[test]
 fn should() {
     let x = ((1, 2), (3, 4));
-    let mut o = 0;
-    let mut m = blarg!([ (y, z) ] y, z ; [(w, h)] => o += w + h);
-    m(x);
+    let mut m = blarg!([ (y, z) ] y, z ; [(w, h)] => (w, h));
+    let mut o = m(x);
 
-    assert_eq!(o, 3);
+    let a = o.next();
+
+    assert_eq!(a, Some((3, 1)));
 }
