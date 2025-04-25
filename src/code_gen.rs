@@ -16,7 +16,11 @@ pub (crate) fn gen_pattern(mut pattern : Pattern) -> Rc<str> {
         }
     }
 
-    format!("|input| {}", r_to_str(&ret)).into()
+    let w :Rc<str>= format!("|input| std::iter::from_fn( move || {{ {} \n return None; }} )", r_to_str(&ret)).into();
+
+    println!("{}", w);
+
+    w
 }
 
 enum R {
@@ -42,7 +46,7 @@ impl Clone for R {
 fn r_to_str(input : &R) -> Rc<str> {
     match input {
         R::Match { input, pattern, expr } => gen_match(&input, &pattern, &r_to_str(expr)),
-        R::ReturnExpr(s) => Rc::clone(s),
+        R::ReturnExpr(s) => format!("return Some({})", s).into(),
         R::SyntaxList(l) => l.into_iter().map(|x| r_to_str(x)).collect::<Vec<_>>().join("\n").into(),
     }
 }
