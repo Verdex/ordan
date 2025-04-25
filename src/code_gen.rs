@@ -8,11 +8,11 @@ pub (crate) fn gen_pattern(mut pattern : Pattern) -> Rc<str> {
 
     while let Some(clause) = pattern.clauses.pop() {
         if clause.nexts.len() == 0 {
-            ret = R::Match { input: "input".into(), pattern: Rc::clone(&clause.pattern), expr: Rc::new(ret) };
+            ret = R::Match { input: "input".into(), pattern: Rc::clone(&clause.pattern), expr: Box::new(ret) };
         }
         else {
             ret = R::SyntaxList(clause.nexts.into_iter()
-                .map(|next| R::Match { input: next, pattern: Rc::clone(&clause.pattern), expr: Rc::new(ret.clone()) })
+                .map(|next| R::Match { input: next, pattern: Rc::clone(&clause.pattern), expr: Box::new(ret.spawn()) })
                 .collect::<Vec<_>>())
         }
     }
@@ -36,21 +36,21 @@ pub (crate) fn gen_pattern(mut pattern : Pattern) -> Rc<str> {
 }
 
 enum R {
-    Match { input : Rc<str>, pattern : Rc<str>, expr : Rc<R> },
+    Match { input : Rc<str>, pattern : Rc<str>, expr : Box<R> },
     ReturnExpr(Rc<str>),
     SyntaxList(Vec<R>),
 }
 
-impl Clone for R {
-    fn clone(&self) -> Self {
+impl R {
+    pub fn spawn(&self) -> Self {
         match self {
             R::Match { input, pattern, expr } => R::Match { 
                 input: Rc::clone(input), 
                 pattern: Rc::clone(pattern), 
-                expr: Rc::clone(expr)
+                expr: Box::new(expr.spawn()),
             },
             R::ReturnExpr(s) => R::ReturnExpr(Rc::clone(s)),
-            R::SyntaxList(l) => R::SyntaxList(l.clone()),
+            R::SyntaxList(l) => R::SyntaxList(l.iter().map(|x| x.spawn()).collect()),
         }
     }
 }
