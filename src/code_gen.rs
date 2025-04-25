@@ -69,12 +69,16 @@ fn r_to_str(input : &R) -> Rc<str> {
     match input {
         R::Match { input, pattern, expr } => gen_match(&input, &pattern, &r_to_str(expr)),
         R::ReturnExpr(s) => format!("return Some({})", s).into(),
-        R::SyntaxList(id, l) => l.into_iter()
-                                 .enumerate()
-                                 .map(|(i, x)| format!("if {} == {} {{ {} }} ", id, i, r_to_str(x)))
-                                 .collect::<Vec<_>>()
-                                 .join("\n")
-                                 .into(),
+        R::SyntaxList(id, l) => {
+            let c = l.len();
+            let nexts = l.into_iter()
+                         .enumerate()
+                         .map(|(i, x)| format!("if {id} == {i} {{ {id} = ({id} + 1) % {c}; {} }} ", r_to_str(x)))
+                         .collect::<Vec<_>>()
+                         .join("\n");
+
+            nexts.into()
+        },
     }
 }
 
