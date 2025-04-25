@@ -40,7 +40,7 @@ pub (crate) fn gen_pattern(mut pattern : Pattern) -> Rc<str> {
 
     println!("{}", w);
 
-    //panic!();
+    panic!();
 
     w
 }
