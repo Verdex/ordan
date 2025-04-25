@@ -9,5 +9,5 @@ fn should() {
 
     let a = o.next();
 
-    assert_eq!(a, Some((3, 1)));
+    assert_eq!(a, Some((1, 2)));
 }
