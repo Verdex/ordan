@@ -2,13 +2,15 @@
 use std::rc::Rc;
 use crate::data::*;
 
+const TAG : &str = "";
+
 pub (crate) fn gen_pattern(mut pattern : Pattern) -> Rc<str> {
 
     let mut ret = R::ReturnExpr(pattern.return_expr);
 
     while let Some(clause) = pattern.clauses.pop() {
         if clause.nexts.len() == 0 {
-            ret = R::Match { input: "input".into(), pattern: Rc::clone(&clause.pattern), expr: Box::new(ret) };
+            ret = R::Match { input: format!("input_{TAG}").into(), pattern: Rc::clone(&clause.pattern), expr: Box::new(ret) };
         }
         else {
             ret = R::SyntaxList(clause.nexts.into_iter()
@@ -24,7 +26,7 @@ pub (crate) fn gen_pattern(mut pattern : Pattern) -> Rc<str> {
 
     let total_ids = unsafe { ID };
 
-    let guards = (0..total_ids).map(|x| format!("let mut x_{x} = true;")).collect::<Vec<_>>().join("");
+    let guards = (0..total_ids).map(|x| format!("let mut guard_{TAG}_{x} = true;")).collect::<Vec<_>>().join("");
 
     format!(
         
@@ -32,7 +34,7 @@ pub (crate) fn gen_pattern(mut pattern : Pattern) -> Rc<str> {
 
         use std::borrow::Borrow;
 
-        let input = {target}.borrow();
+        let input_{TAG} = {target}.borrow();
         
         {guards}
 
@@ -75,7 +77,7 @@ fn r_to_str(input : &R) -> Rc<str> {
                 ID += 1;
                 t
             };
-            format!("if x_{id} {{ x_{id} = false; return Some({}); }}", s).into()
+            format!("if guard_{TAG}_{id} {{ guard_{TAG}_{id} = false; return Some({}); }}", s).into()
         }
         R::SyntaxList(l) => {
             let nexts = l.into_iter()
