@@ -4,23 +4,25 @@ use crate::data::*;
 
 pub (crate) fn gen_pattern(mut pattern : Pattern) -> Rc<str> {
 
-    let mut gates : Vec<Rc<str>> = vec![];
-    let mut id = 0;
     let mut ret = R::ReturnExpr(pattern.return_expr);
 
     while let Some(clause) = pattern.clauses.pop() {
         if clause.nexts.len() == 0 {
-            ret = R::Match { input: "input".into(), pattern: Rc::clone(&clause.pattern), expr: Rc::new(ret) };
+            ret = R::Match { input: "input".into(), pattern: Rc::clone(&clause.pattern), expr: Box::new(ret) };
         }
         else {
-            let x : Rc<str> = format!("x_{}", id).into();
-            gates.push(Rc::clone(&x));
-            id += 1;
-            ret = R::SyntaxList(x, clause.nexts.into_iter()
-                .map(|next| R::Match { input: next, pattern: Rc::clone(&clause.pattern), expr: Rc::new(ret.clone()) })
+            ret = R::SyntaxList(clause.nexts.into_iter()
+                .map(|next| R::Match { input: next, pattern: Rc::clone(&clause.pattern), expr: Box::new(ret.clone()) })
                 .collect::<Vec<_>>())
         }
     }
+
+    // Note:  Compute this first so that ID will have the correct value.
+    let match_statement = r_to_str(&ret);
+
+    let total_ids = unsafe { ID };
+
+    let guards = (0..total_ids).map(|x| format!("let mut x_{x} = true;")).collect::<Vec<_>>().join("");
 
     // TODO input : &_ ?
     let w :Rc<str>= 
@@ -28,27 +30,25 @@ pub (crate) fn gen_pattern(mut pattern : Pattern) -> Rc<str> {
             
             "|input| {{
             
-            {}
-            
-            std::iter::from_fn( move || {{ {} \n return None; }} )
+            {guards}
+
+            std::iter::from_fn( move || {{ {match_statement} \n return None; }} )
             
             }}", 
     
-            gates.into_iter().map(|gate| format!("let mut {} = 0;\n", gate)).collect::<Vec<_>>().join(""),
-    
-            r_to_str(&ret)).into();
+
+            ).into();
 
     println!("{}", w);
 
-    panic!();
 
     w
 }
 
 enum R {
-    Match { input : Rc<str>, pattern : Rc<str>, expr : Rc<R> },
+    Match { input : Rc<str>, pattern : Rc<str>, expr : Box<R> },
     ReturnExpr(Rc<str>),
-    SyntaxList(Rc<str>, Vec<R>),
+    SyntaxList(Vec<R>),
 }
 
 impl Clone for R {
@@ -57,23 +57,30 @@ impl Clone for R {
             R::Match { input, pattern, expr } => R::Match { 
                 input: Rc::clone(input), 
                 pattern: Rc::clone(pattern), 
-                expr: Rc::clone(expr)
+                expr: expr.clone(),
             },
             R::ReturnExpr(s) => R::ReturnExpr(Rc::clone(s)),
-            R::SyntaxList(id, l) => R::SyntaxList(Rc::clone(id), l.clone()),
+            R::SyntaxList(l) => R::SyntaxList(l.clone()),
         }
     }
 }
 
+static mut ID : usize = 0;
+
 fn r_to_str(input : &R) -> Rc<str> {
     match input {
         R::Match { input, pattern, expr } => gen_match(&input, &pattern, &r_to_str(expr)),
-        R::ReturnExpr(s) => format!("return Some({})", s).into(),
-        R::SyntaxList(id, l) => {
-            let c = l.len();
+        R::ReturnExpr(s) => {
+            let id = unsafe {
+                let t = ID;
+                ID += 1;
+                t
+            };
+            format!("if x_{id} {{ x_{id} = false; return Some({}); }}", s).into()
+        }
+        R::SyntaxList(l) => {
             let nexts = l.into_iter()
-                         .enumerate()
-                         .map(|(i, x)| format!("if {id} == {i} {{ {id} = ({id} + 1) % {c}; {} }} ", r_to_str(x)))
+                         .map(|x| r_to_str(x))
                          .collect::<Vec<_>>()
                          .join("\n");
 
