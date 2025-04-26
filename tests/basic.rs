@@ -11,30 +11,20 @@ fn should_get_items() {
 }
 
 #[test]
-fn should() {
-    /*let x = ((1, 2), (3, 4));
-    let mut m = blarg!([ (y, z) ] y, z ; [(w, h)] => (w, h));
-    let mut o = m(x);
-
-    let a = o.next();
-
-    //assert_eq!(a, Some((1, 2)));
-
-    let a = o.next();
-
-    //assert_eq!(a, Some((3, 4)));
-    */
+fn should_use_previous_variables() {
+    let input = (((1, 2), (3, 4)), ((5, 6), (7, 8)));
+    let output = s_pattern!(input => [ (y, z) ] y, z ; [(w, h)] w, h; [(l, r)]  => (y.0.0, w.1, l, r))
+        .map(|(a, b, c, d)| (a, b, *c, *d))
+        .collect::<Vec<_>>();
+    assert_eq!(output, vec![(1, 2, 1, 2), (1, 2, 3, 4), (1, 6, 5, 6), (1, 6, 7, 8)]);
 }
 
 #[test]
-fn should_2() {
+fn should_handle_no_copy_data() {
     #[derive(Debug, PartialEq)]
     struct W(usize);
 
-    let x = (((W(1), W(2)), (W(3), W(4))), ((W(5), W(6)), (W(7), W(8))));
-    let m = s_pattern!(x => [ (y, z) ] y, z ; [(w, h)] w, h; [(l, r)]  => (l, r));
-
-    let a = m.take(100).collect::<Vec<_>>();
-
-    assert_eq!(a, vec![]);
+    let input = (((W(1), W(2)), (W(3), W(4))), ((W(5), W(6)), (W(7), W(8))));
+    let output = s_pattern!(input => [ (y, z) ] y, z ; [(w, h)] w, h; [(l, r)]  => (l, r)).collect::<Vec<_>>();
+    assert_eq!(output, vec![(&W(1), &W(2)), (&W(3), &W(4)), (&W(5), &W(6)), (&W(7), &W(8))]);
 }
