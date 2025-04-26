@@ -17,6 +17,8 @@ pub (crate) fn gen_pattern(mut pattern : Pattern) -> Rc<str> {
         }
     }
 
+    let target = pattern.target;
+
     // Note:  Compute this first so that ID will have the correct value.
     let match_statement = r_to_str(&ret);
 
@@ -31,7 +33,7 @@ pub (crate) fn gen_pattern(mut pattern : Pattern) -> Rc<str> {
 
             use std::borrow::Borrow;
 
-            let input = x.borrow();
+            let input = {target}.borrow();
             
             {guards}
 

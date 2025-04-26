@@ -21,8 +21,9 @@ fn should() {
 fn should_2() {
     #[derive(Debug, PartialEq)]
     struct W(usize);
+
     let x = (((W(1), W(2)), (W(3), W(4))), ((W(5), W(6)), (W(7), W(8))));
-    let m = blarg!([ (y, z) ] y, z ; [(w, h)] w, h; [(l, r)]  => (l, r));
+    let m = blarg!(x => [ (y, z) ] y, z ; [(w, h)] w, h; [(l, r)]  => (l, r));
 
     let a = m.take(100).collect::<Vec<_>>();
 
