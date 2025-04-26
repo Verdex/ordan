@@ -12,7 +12,7 @@ pub (crate) fn gen_pattern(mut pattern : Pattern) -> Rc<str> {
         }
         else {
             ret = R::SyntaxList(clause.nexts.into_iter()
-                .map(|next| R::Match { input: next, pattern: Rc::clone(&clause.pattern), expr: Box::new(ret.spawn()) })
+                .map(|next| R::Match { input: next, pattern: Rc::clone(&clause.pattern), expr: Box::new(ret.clone()) })
                 .collect::<Vec<_>>())
         }
     }
@@ -41,16 +41,16 @@ enum R {
     SyntaxList(Vec<R>),
 }
 
-impl R {
-    pub fn spawn(&self) -> Self {
+impl Clone for R {
+    fn clone(&self) -> Self {
         match self {
             R::Match { input, pattern, expr } => R::Match { 
                 input: Rc::clone(input), 
                 pattern: Rc::clone(pattern), 
-                expr: Box::new(expr.spawn()),
+                expr: expr.clone(),
             },
             R::ReturnExpr(id, s) => R::ReturnExpr(*id, Rc::clone(s)),
-            R::SyntaxList(l) => R::SyntaxList(l.iter().map(|x| x.spawn()).collect()),
+            R::SyntaxList(l) => R::SyntaxList(l.clone()),
         }
     }
 }
