@@ -2,6 +2,15 @@
 use ordan::*;
 
 #[test]
+fn should_get_items() {
+    let input = (((1, 2), (3, 4)), ((5, 6), (7, 8)));
+    let output = blarg!(input => [ (y, z) ] y, z ; [(w, h)] w, h; [(l, r)]  => (l, r))
+        .map(|(a, b)| (*a, *b))
+        .collect::<Vec<_>>();
+    assert_eq!(output, vec![(1, 2), (3, 4), (5, 6), (7, 8)]);
+}
+
+#[test]
 fn should() {
     /*let x = ((1, 2), (3, 4));
     let mut m = blarg!([ (y, z) ] y, z ; [(w, h)] => (w, h));
