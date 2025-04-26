@@ -4,7 +4,7 @@ use crate::data::*;
 
 pub (crate) fn gen_pattern(mut pattern : Pattern) -> Rc<str> {
 
-    let mut ret = R::ReturnExpr(pattern.return_expr);
+    let mut ret = R::ReturnExpr(0, pattern.return_expr);
 
     while let Some(clause) = pattern.clauses.pop() {
         if clause.nexts.len() == 0 {
@@ -37,7 +37,7 @@ pub (crate) fn gen_pattern(mut pattern : Pattern) -> Rc<str> {
 
 enum R {
     Match { input : Rc<str>, pattern : Rc<str>, expr : Box<R> },
-    ReturnExpr(Rc<str>),
+    ReturnExpr(usize, Rc<str>),
     SyntaxList(Vec<R>),
 }
 
@@ -49,7 +49,7 @@ impl R {
                 pattern: Rc::clone(pattern), 
                 expr: Box::new(expr.spawn()),
             },
-            R::ReturnExpr(s) => R::ReturnExpr(Rc::clone(s)),
+            R::ReturnExpr(id, s) => R::ReturnExpr(*id, Rc::clone(s)),
             R::SyntaxList(l) => R::SyntaxList(l.iter().map(|x| x.spawn()).collect()),
         }
     }
@@ -58,7 +58,7 @@ impl R {
 fn r_to_str(input : &R) -> Rc<str> {
     match input {
         R::Match { input, pattern, expr } => gen_match(&input, &pattern, &r_to_str(expr)),
-        R::ReturnExpr(s) => format!("return Some({})", s).into(),
+        R::ReturnExpr(_, s) => format!("return Some({})", s).into(),
         R::SyntaxList(l) => {
             let nexts = l.into_iter()
                          .map(|x| r_to_str(x))
