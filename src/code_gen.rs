@@ -91,7 +91,7 @@ fn r_to_str(input : &R) -> Rc<str> {
 }
 
 fn gen_match(input : &str, pattern : &str, expr : &str) -> Rc<str> {
-    format!("match {} {{
+    format!("match {}.borrow() {{
         {} => {{ {} }}, 
         _ => {{ }},
     }}", input, pattern, expr).into()
