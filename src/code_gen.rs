@@ -17,17 +17,27 @@ pub (crate) fn gen_pattern(mut pattern : Pattern) -> Rc<str> {
         }
     }
 
+    // Note:  Compute this first so that ID will have the correct value.
+    let match_statement = r_to_str(&ret);
+
+    let total_ids = unsafe { ID };
+
+    let guards = (0..total_ids).map(|x| format!("let mut x_{x} = true;")).collect::<Vec<_>>().join("");
+
     // TODO input : &_ ?
     let w :Rc<str>= 
         format!(
             
             "|input| {{
             
-            std::iter::from_fn( move || {{ {} \n return None; }} )
+            {guards}
+
+            std::iter::from_fn( move || {{ {match_statement} \n return None; }} )
             
             }}", 
     
-            r_to_str(&ret)).into();
+
+            ).into();
 
     println!("{}", w);
 
@@ -55,10 +65,19 @@ impl Clone for R {
     }
 }
 
+static mut ID : usize = 0;
+
 fn r_to_str(input : &R) -> Rc<str> {
     match input {
         R::Match { input, pattern, expr } => gen_match(&input, &pattern, &r_to_str(expr)),
-        R::ReturnExpr(s) => format!("return Some({})", s).into(),
+        R::ReturnExpr(s) => {
+            let id = unsafe {
+                let t = ID;
+                ID += 1;
+                t
+            };
+            format!("if x_{id} {{ x_{id} = false; return Some({}); }}", s).into()
+        }
         R::SyntaxList(l) => {
             let nexts = l.into_iter()
                          .map(|x| r_to_str(x))
