@@ -4,7 +4,7 @@ use ordan::*;
 #[test]
 fn should_get_items() {
     let input = (((1, 2), (3, 4)), ((5, 6), (7, 8)));
-    let output = blarg!(input => [ (y, z) ] y, z ; [(w, h)] w, h; [(l, r)]  => (l, r))
+    let output = s_pattern!(input => [ (y, z) ] y, z ; [(w, h)] w, h; [(l, r)]  => (l, r))
         .map(|(a, b)| (*a, *b))
         .collect::<Vec<_>>();
     assert_eq!(output, vec![(1, 2), (3, 4), (5, 6), (7, 8)]);
@@ -32,7 +32,7 @@ fn should_2() {
     struct W(usize);
 
     let x = (((W(1), W(2)), (W(3), W(4))), ((W(5), W(6)), (W(7), W(8))));
-    let m = blarg!(x => [ (y, z) ] y, z ; [(w, h)] w, h; [(l, r)]  => (l, r));
+    let m = s_pattern!(x => [ (y, z) ] y, z ; [(w, h)] w, h; [(l, r)]  => (l, r));
 
     let a = m.take(100).collect::<Vec<_>>();
 

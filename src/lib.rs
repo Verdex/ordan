@@ -8,7 +8,7 @@ use jlnexus::Parser;
 
 
 #[proc_macro]
-pub fn blarg( input : TokenStream ) -> TokenStream {
+pub fn s_pattern( input : TokenStream ) -> TokenStream {
     let input = input.into_iter().collect::<Vec<_>>();
     let mut parser = Parser::new(&input);
     let result = parsing::parse(&mut parser).unwrap();
