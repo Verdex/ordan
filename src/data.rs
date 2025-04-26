@@ -7,6 +7,7 @@ pub (crate) struct Clause {
 }
 
 pub (crate) struct Pattern {
+    pub (crate) target : Rc<str>,
     pub (crate) clauses : Vec<Clause>,
     pub (crate) return_expr : Rc<str>,
 }

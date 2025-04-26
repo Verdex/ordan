@@ -19,11 +19,13 @@ fn should() {
 
 #[test]
 fn should_2() {
-    let x = (((1, 2), (3, 4)), ((5, 6), (7, 8)));
-    let m = blarg!([ (y, z) ] y, z ; [(w, h)] w, h; [(l, r)]  => (l, r));
-    let o = m(x);
+    #[derive(Debug, PartialEq)]
+    struct W(usize);
 
-    let a = o.take(100).collect::<Vec<_>>();
+    let x = (((W(1), W(2)), (W(3), W(4))), ((W(5), W(6)), (W(7), W(8))));
+    let m = blarg!(x => [ (y, z) ] y, z ; [(w, h)] w, h; [(l, r)]  => (l, r));
+
+    let a = m.take(100).collect::<Vec<_>>();
 
     assert_eq!(a, vec![]);
 }

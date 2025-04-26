@@ -17,6 +17,8 @@ pub (crate) fn gen_pattern(mut pattern : Pattern) -> Rc<str> {
         }
     }
 
+    let target = pattern.target;
+
     // Note:  Compute this first so that ID will have the correct value.
     let match_statement = r_to_str(&ret);
 
@@ -24,11 +26,14 @@ pub (crate) fn gen_pattern(mut pattern : Pattern) -> Rc<str> {
 
     let guards = (0..total_ids).map(|x| format!("let mut x_{x} = true;")).collect::<Vec<_>>().join("");
 
-    // TODO input : &_ ?
     let w :Rc<str>= 
         format!(
             
-            "|input| {{
+            "{{
+
+            use std::borrow::Borrow;
+
+            let input = {target}.borrow();
             
             {guards}
 

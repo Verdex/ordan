@@ -20,6 +20,11 @@ macro_rules! proj {
 }
 
 pub (crate) fn parse(input : &mut Parser<TokenTree>) -> Result<Pattern, ()> {
+
+    let target : Rc<str> = proj!(input, x @ TokenTree::Ident(_), x.to_string().into())?;
+    proj!(input, TokenTree::Punct(p) if p.as_char() == '=', ())?;
+    proj!(input, TokenTree::Punct(p) if p.as_char() == '>', ())?;
+
     let clauses = {
         let first_pattern = pattern(input)?;
 
@@ -40,7 +45,7 @@ pub (crate) fn parse(input : &mut Parser<TokenTree>) -> Result<Pattern, ()> {
 
     let return_expr : Rc<str> = input.list(|input| Ok(input.get(())?.to_string()))?.join("").into();   // TODO get error
 
-    Ok(Pattern { clauses, return_expr })
+    Ok(Pattern { target, clauses, return_expr })
 }
 
 fn pattern(input : &mut Parser<TokenTree>) -> Result<Rc<str>, ()> {
