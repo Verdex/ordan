@@ -2,6 +2,7 @@
 use std::rc::Rc;
 
 pub (crate) struct Clause {
+    pub (crate) slice : bool,
     pub (crate) pattern : Rc<str>,
     pub (crate) nexts : Vec<Rc<str>>,
 }

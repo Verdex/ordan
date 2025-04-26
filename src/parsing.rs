@@ -26,16 +26,18 @@ pub (crate) fn parse(input : &mut Parser<TokenTree>) -> Result<Pattern, ()> {
     proj!(input, TokenTree::Punct(p) if p.as_char() == '>', ())?;
 
     let clauses = {
+        let first_slice = is_slice(input)?;
         let first_pattern = pattern(input)?;
 
         let mut rest_clause = input.list(|input| {
             let ns = nexts(input)?;
             proj!(input, TokenTree::Punct(p) if p.as_char() == ';', ())?;
+            let slice = is_slice(input)?;
             let pat = pattern(input)?;
-            Ok(Clause { pattern: pat, nexts: ns })
+            Ok(Clause { slice, pattern: pat, nexts: ns })
         })?;
 
-        rest_clause.insert(0, Clause { pattern: first_pattern, nexts: vec![] });
+        rest_clause.insert(0, Clause { slice: first_slice, pattern: first_pattern, nexts: vec![] });
 
         rest_clause
     };
@@ -62,4 +64,18 @@ fn nexts(input : &mut Parser<TokenTree>) -> Result<Vec<Rc<str>>, ()> {
     rest.insert(0, first);
 
     Ok(rest)
+}
+
+fn is_slice(input : &mut Parser<TokenTree>) -> Result<bool, ()> {
+    let result = input.option(|input| {
+        let value = proj!(input, x @ TokenTree::Ident(_), x.to_string())?;
+        if value == "slice" {
+            Ok(Some(()))
+        }
+        else {
+            Ok(None)
+        }
+    })?;
+
+    Ok(result.is_some())
 }
