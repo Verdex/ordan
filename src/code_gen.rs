@@ -26,28 +26,22 @@ pub (crate) fn gen_pattern(mut pattern : Pattern) -> Rc<str> {
 
     let guards = (0..total_ids).map(|x| format!("let mut x_{x} = true;")).collect::<Vec<_>>().join("");
 
-    let w :Rc<str>= 
-        format!(
-            
-            "{{
+    format!(
+        
+        "{{
 
-            use std::borrow::Borrow;
+        use std::borrow::Borrow;
 
-            let input = {target}.borrow();
-            
-            {guards}
+        let input = {target}.borrow();
+        
+        {guards}
 
-            std::iter::from_fn( move || {{ {match_statement} \n return None; }} )
-            
-            }}", 
-    
-
-            ).into();
-
-    println!("{}", w);
+        std::iter::from_fn( move || {{ {match_statement} \n return None; }} )
+        
+        }}", 
 
 
-    w
+        ).into()
 }
 
 enum R {
