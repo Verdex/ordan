@@ -2,7 +2,7 @@
 use std::rc::Rc;
 use crate::data::*;
 
-const TAG : &str = "";
+const TAG : &str = "ORDAN0";
 
 pub (crate) fn gen_pattern(mut pattern : Pattern) -> Rc<str> {
 
