@@ -46,3 +46,15 @@ fn should_allow_pattern_filter() {
         .collect::<Vec<_>>();
     assert_eq!(output, vec![2, 6]);
 }
+
+#[test]
+fn should_handle_enum() {
+    enum T {
+        N(Box<T>, Box<T>),
+        L(usize),
+    }
+
+    let input = T::N(Box::new(T::N(Box::new(T::L(1)), Box::new(T::L(2)))), Box::new(T::L(0)));
+    let output = s_pattern!(input => [ T::N(a, b) ] a, b; [ T::L(x) ] => *x).collect::<Vec<_>>();
+    assert_eq!(output, vec![0]);
+}
