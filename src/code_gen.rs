@@ -70,7 +70,12 @@ static mut ID : usize = 0;
 
 fn r_to_str(input : &R) -> Rc<str> {
     match input {
-        R::Match { input, pattern, expr } => gen_match(&input, &pattern, &r_to_str(expr)),
+        R::Match { input, pattern, expr } => {
+            format!("match {input}.borrow() {{
+                {pattern} => {{ {} }}, 
+                _ => {{ }},
+            }}", r_to_str(expr)).into()
+        }, 
         R::ReturnExpr(s) => {
             let id = unsafe {
                 let t = ID;
@@ -88,11 +93,4 @@ fn r_to_str(input : &R) -> Rc<str> {
             nexts.into()
         },
     }
-}
-
-fn gen_match(input : &str, pattern : &str, expr : &str) -> Rc<str> {
-    format!("match {}.borrow() {{
-        {} => {{ {} }}, 
-        _ => {{ }},
-    }}", input, pattern, expr).into()
 }
