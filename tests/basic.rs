@@ -58,3 +58,19 @@ fn should_handle_enum() {
     let output = s_pattern!(input => [ T::N(a, b) ] a, b; [ T::L(x) ] => *x).collect::<Vec<_>>();
     assert_eq!(output, vec![0]);
 }
+
+#[test]
+fn should_handle_vec() {
+    let input = vec![ vec![1, 2], vec![3, 4] ];
+    let output = s_pattern!(input => slice [ [a, b] ] a, b; slice [ [c, d] ] => (*c, *d)).collect::<Vec<_>>();
+    assert_eq!(output, vec![(1, 2), (3, 4)]);
+}
+
+#[test]
+fn should_handle_inner_vec() {
+    struct Item(Vec<usize>);
+
+    let input = Item(vec![1, 2, 3]);
+    let output = s_pattern!(input => [ Item(x) ] x; slice [ [c, d, ..] ] => (*c, *d)).collect::<Vec<_>>();
+    assert_eq!(output, vec![(1, 2)]);
+}
