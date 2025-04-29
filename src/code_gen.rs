@@ -2,14 +2,17 @@
 use std::rc::Rc;
 use crate::data::*;
 
-const TAG : &str = "ORDAN0";
+const TAG : &str = "ordan0";
 
 pub (crate) fn gen_pattern(mut pattern : Pattern) -> Rc<str> {
 
     let mut ret = R::ReturnExpr(pattern.return_expr);
 
+    let mut initial_slice = false;
+
     while let Some(clause) = pattern.clauses.pop() {
         if clause.nexts.len() == 0 {
+            initial_slice = clause.slice;
             ret = R::Match { 
                 input: format!("input_{TAG}").into(), 
                 pattern: Rc::clone(&clause.pattern), 
@@ -38,13 +41,20 @@ pub (crate) fn gen_pattern(mut pattern : Pattern) -> Rc<str> {
 
     let guards = (0..total_ids).map(|x| format!("let mut guard_{TAG}_{x} = true;")).collect::<Vec<_>>().join("");
 
+    let maybe_borrow = if initial_slice {
+        ""
+    }
+    else {
+        ".borrow()"
+    };
+
     format!(
         
         "{{
 
         use std::borrow::Borrow;
 
-        let input_{TAG} = {target}.borrow();
+        let input_{TAG} = {target}{maybe_borrow};
         
         {guards}
 
