@@ -1,5 +1,6 @@
 
 use std::rc::Rc;
+use proc_macro::Span;
 
 pub (crate) struct Clause {
     pub (crate) slice : bool,
@@ -12,3 +13,5 @@ pub (crate) struct Pattern {
     pub (crate) clauses : Vec<Clause>,
     pub (crate) return_expr : Rc<str>,
 }
+
+pub (crate) struct Error(pub (crate) Span, pub (crate) &'static str);
