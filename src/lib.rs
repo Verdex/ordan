@@ -18,7 +18,7 @@ pub fn s_pattern( input : TokenStream ) -> TokenStream {
     }
 }
 
-pub (crate) fn gen_compile_error(error : Error) -> TokenStream {
+fn gen_compile_error(error : Error) -> TokenStream {
     let mut code = format!("compile_error!(\"{}\");", error.1)
         .parse::<TokenStream>()
         .unwrap()
