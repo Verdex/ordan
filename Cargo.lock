@@ -9,7 +9,7 @@ source = "git+https://www.github.com/verdex/jlnexus?tag=release-2.0.0#2a8cac4887
 
 [[package]]
 name = "ordan"
-version = "1.0.0"
+version = "1.0.1"
 dependencies = [
  "jlnexus",
 ]
