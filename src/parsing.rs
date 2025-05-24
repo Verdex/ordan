@@ -1,18 +1,18 @@
 
 use std::rc::Rc;
-use proc_macro::{ TokenTree, Delimiter, Span };
+use proc_macro::{ TokenTree, Delimiter };
 use jlnexus::Parser;
 use crate::data::*;
 
 macro_rules! proj {
     ($input:ident, $target:pat, $e:expr, $error:literal) => {
-        match $input.get(Error(Span::call_site(), "unexpected end of stream"))? {
+        match $input.get()? {
             $target => Ok($e),
             t => Err(Error(t.span(), $error)), 
         }
     };
     ($input:ident, $target:pat if $p:expr, $e:expr, $error:literal) => {
-        match $input.get(Error(Span::call_site(), "unexpected end of stream"))? { 
+        match $input.get()? { 
             $target if $p => Ok($e),
             t => Err(Error(t.span(), $error)), 
         }
@@ -46,7 +46,7 @@ pub (crate) fn parse(input : &mut Parser<TokenTree>) -> Result<Pattern, Error> {
     proj!(input, TokenTree::Punct(p) if p.as_char() == '>', (), "expected '>'")?;
 
     let return_expr : Rc<str> = input.list(|input| 
-        Ok(input.get(Error(Span::call_site(), "unexpected end of stream"))?.to_string()))?.join("").into();
+        Ok(input.get()?.to_string()))?.join("").into();
 
     Ok(Pattern { target, clauses, return_expr })
 }
